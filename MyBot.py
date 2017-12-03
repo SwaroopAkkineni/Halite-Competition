@@ -39,8 +39,6 @@ while True:
         for planet in game_map.all_planets():
             # If the planet is owned
             if planet.is_owned():
-                if not planet.is_full():
-                    command_queue.append(ship.dock(planet))
                 # Skip this planet
                 continue
 
@@ -70,6 +68,7 @@ while True:
             break
 
     # Send our set of commands to the Halite engine for this turn
+
     game.send_command_queue(command_queue)
     # TURN END
 # GAME END

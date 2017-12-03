@@ -4,4 +4,4 @@ if [ -f $file ] ; then
     rm $file
 fi
 
-zip submission.zip MyBot.py hlt/
+zip submission.zip MyBot.py hlt/*
