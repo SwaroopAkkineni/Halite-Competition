@@ -1,12 +1,10 @@
 """
 Welcome to your first Halite-II bot!
-
 This bot's name is Settler. It's purpose is simple (don't expect it to win complex games :) ):
 1. Initialize game
 2. If a ship is not docked and there are unowned planets
 2.a. Try to Dock in the planet if close enough
 2.b If not, go towards the planet
-
 Note: Please do not place print statements here as they are used to communicate with the Halite engine. If you need
 to log anything use the logging module.
 """
@@ -27,25 +25,28 @@ while True:
     game_map = game.update_map()
 
     # Here we define the set of commands to be sent to the Halite engine at the end of the turn
-    command_queue = []
+    planetqueue = []
     # For every ship that I control
     for ship in game_map.get_me().all_ships():
         # If the ship is docked
         if ship.docking_status != ship.DockingStatus.UNDOCKED:
             # Skip this ship
             continue
-
         # For each planet in the game (only non-destroyed planets are included)
+        largest_planet = max(planet.radius for planet in game_map.all_planets())
+
         for planet in game_map.all_planets():
             # If the planet is owned
             if planet.is_owned():
                 # Skip this planet
                 continue
 
+            if planet == largest_planet:
+                planetqueue.insert(0, planet)
+
             # If we can dock, let's (try to) dock. If two ships try to dock at once, neither will be able to.
             if ship.can_dock(planet):
-                # We add the command by appending it to the command_queue
-                command_queue.append(ship.dock(planet))
+                planetqueue.append(planet)
             else:
                 # If we can't dock, we move towards the closest empty point near this planet (by using closest_point_to)
                 # with constant speed. Don't worry about pathfinding for now, as the command will do it for you.
@@ -64,10 +65,26 @@ while True:
                 # or we are trapped (or we reached our destination!), navigate_command will return null;
                 # don't fret though, we can run the command again the next turn)
                 if navigate_command:
-                    command_queue.append(navigate_command)
+                    planetqueue.append(planet)
             break
 
     # Send our set of commands to the Halite engine for this turn
+    command_queue = []
+    planets = planetqueue
+    ships = game_map.get_me().all_ships()
+
+    # planets = game_map.all_planets()
+    # ships = game_map.get_me().all_ships()
+    # for current in range(0, len(ships)):
+    #     ships[current].navigate(ship.closest_point_to(planets[current % len(planets)]),
+    #                             game_map,
+    #                             speed=hlt.constants.MAX_SPEED / 2))
+
+    for current in range(0, len(ships)):
+        planet = ships[current].closest_point_to(planets[current % len(planets)])
+        navCommand = ships[current].navigate(planet, game_map, speed=hlt.constants.MAX_SPEED)
+        if navCommand:
+            command_queue.append(ships[current].dock(planet))
 
     game.send_command_queue(command_queue)
     # TURN END

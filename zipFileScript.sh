@@ -1,3 +1,4 @@
+clear
 file="submission.zip"
 
 if [ -f $file ] ; then
