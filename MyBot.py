@@ -43,9 +43,8 @@ while True:
 
             if planet == largest_planet:
                 planetqueue.insert(0, planet)
-
-            # If we can dock, let's (try to) dock. If two ships try to dock at once, neither will be able to.
-            if ship.can_dock(planet):
+            elif ship.can_dock(planet):
+                # If we can dock, let's (try to) dock. If two ships try to dock at once, neither will be able to.
                 planetqueue.append(planet)
             else:
                 # If we can't dock, we move towards the closest empty point near this planet (by using closest_point_to)
@@ -73,18 +72,16 @@ while True:
     planets = planetqueue
     ships = game_map.get_me().all_ships()
 
-    # planets = game_map.all_planets()
-    # ships = game_map.get_me().all_ships()
-    # for current in range(0, len(ships)):
-    #     ships[current].navigate(ship.closest_point_to(planets[current % len(planets)]),
-    #                             game_map,
-    #                             speed=hlt.constants.MAX_SPEED / 2))
-
     for current in range(0, len(ships)):
-        planet = ships[current].closest_point_to(planets[current % len(planets)])
-        navCommand = ships[current].navigate(planet, game_map, speed=hlt.constants.MAX_SPEED)
-        if navCommand:
-            command_queue.append(ships[current].dock(planet))
+
+        navCommand = ships[current].navigate(ships[current].closest_point_to(planets[current%len(planets)]),
+                                             game_map,
+                                             speed=int(hlt.constants.MAX_SPEED),
+                                             ignore_ships=True)
+        #if ships[current].can_dock(planets[current%len(planets)]):
+        command_queue.append(ships[current].dock(planets[current%len(planets)]))
+        #elif navCommand:
+        #    command_queue.append(navCommand)
 
     game.send_command_queue(command_queue)
     # TURN END

@@ -6,9 +6,9 @@ import sys
 import json
 import argparse
 
-import upload_bot
-import download_game
-import compare_bots
+import hlt_client.upload_bot
+import hlt_client.download_game
+import hlt_client.compare_bots
 
 from json.decoder import JSONDecodeError
 
@@ -214,16 +214,16 @@ def main():
             if args.metadata:
                 print(Config())
         elif args.mode == BOT_MODE:
-            upload_bot.upload(args.bot_path)
+            hlt_client.upload_bot.upload(args.bot_path)
         elif args.mode == REPLAY_MODE:
-            download_game.download(args.replay_mode, args.destination,
-                                   getattr(args, 'date', None), getattr(args, 'all', None),
-                                   Config().user_id if Config.auth_exists() else None, getattr(args, 'user_id', None),
-                                   getattr(args, 'limit', None))
+            hlt_client.download_game.download(args.replay_mode, args.destination,
+                                              getattr(args, 'date', None), getattr(args, 'all', None),
+                                              Config().user_id if Config.auth_exists() else None, getattr(args, 'user_id', None),
+                                              getattr(args, 'limit', None))
         elif args.mode == GYM_MODE:
-            compare_bots.play_games(args.halite_binary,
-                                    args.map_width, args.map_height,
-                                    args.run_commands, args.iterations)
+            hlt_client.compare_bots.play_games(args.halite_binary,
+                                               args.map_width, args.map_height,
+                                               args.run_commands, args.iterations)
     except (IndexError, TypeError, ValueError, IOError, FileNotFoundError) as err:
         sys.stderr.write(str(err) + os.linesep)
         exit(-1)
