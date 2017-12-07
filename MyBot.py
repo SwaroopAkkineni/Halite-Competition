@@ -26,12 +26,14 @@ while True:
 
     # Here we define the set of commands to be sent to the Halite engine at the end of the turn
     largest_planet = max(planet.radius for planet in game_map.all_planets())
+    planetBoolean = False
 
     # Send our set of commands to the Halite engine for this turn
     command_queue = []
     planets = game_map.all_planets()
     ships = game_map.get_me().all_ships()
 
+    # noinspection PyPackageRequirements
     for current in range(0, len(ships)):
 
         # entities_by_distance = game_map.nearby_entities_by_distance(ships[current])
@@ -43,18 +45,25 @@ while True:
         #         nearest_planet = next((nearest_entity for nearest_entity in entities_by_distance[distance] if
         #                                isinstance(nearest_entity, hlt.entity.Planet)), None)
 
-        if ships[current].can_dock(planets[current % len(planets)]):
-            # if planets[current % len(planets)] == largest_planet:
-            #     command_queue.insert(0, ships[current].dock(planets[current % len(planets)]))
-            # else:
-            command_queue.append(ships[current].dock(planets[current % len(planets)]))
+        if planets[current % len(planets)] == largest_planet:
+            if ships[current].can_dock(planets[current % len(planets)]):
+                if planetBoolean is False:
+                    command_queue.append(ships[current].dock(planets[current % len(planets)]))
+                    planetBoolean = True
         else:
-            navigate_command = ships[current].navigate(ships[current].closest_point_to(planets[current % len(planets)]),
-                                                        game_map,
-                                                        speed=int(hlt.constants.MAX_SPEED),
-                                                        ignore_ships=True)
-            if navigate_command:
-                command_queue.append(navigate_command)
+            if ships[current].can_dock(planets[current % len(planets)]):
+                # if planets[current % len(planets)] == largest_planet:
+                #     command_queue.insert(0, ships[current].dock(planets[current % len(planets)]))
+                # else:
+                command_queue.append(ships[current].dock(planets[current % len(planets)]))
+            else:
+                navigate_command = ships[current].navigate(
+                    ships[current].closest_point_to(planets[current % len(planets)]),
+                    game_map,
+                    speed=int(hlt.constants.MAX_SPEED),
+                    ignore_ships=True)
+                if navigate_command:
+                    command_queue.append(navigate_command)
 
         # #if ships[current].can_dock(nearest_planet):
         # command_queue.append(ships[current].dock(nearest_planet))
